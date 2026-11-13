@@ -1,0 +1,41 @@
+name: Build Pusca Keyboard APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'PuscaKeyboard-GitHub-Ready.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project
+        run: |
+          unzip -q PuscaKeyboard-GitHub-Ready.zip -d project
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        working-directory: project
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pusca-Keyboard-APK
+          path: project/app/build/outputs/apk/debug/app-debug.apk
